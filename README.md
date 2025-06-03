@@ -90,6 +90,10 @@ A simple web application for storing and discovering CSS code snippets. Users ca
    
    # Install dependencies and start
    sudo npm install
+   
+   # If sqlite3 errors occur on Lightsail/EC2:
+   sudo npm install --build-from-source sqlite3
+   
    sudo npm install -g pm2
    pm2 start ecosystem.config.js
    pm2 startup
@@ -154,6 +158,24 @@ CREATE TABLE categories (
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 ```
+
+## Troubleshooting
+
+### SQLite3 Errors
+If you encounter sqlite3 binding errors, run the fix script:
+```bash
+./fix-sqlite.sh
+```
+
+Or manually fix:
+```bash
+rm -rf node_modules package-lock.json
+npm cache clean --force
+npm install
+npm rebuild sqlite3
+```
+
+This rebuilds sqlite3 for your specific system architecture.
 
 ## Security Considerations
 
