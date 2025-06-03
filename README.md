@@ -38,13 +38,24 @@ A simple web application for storing and discovering CSS code snippets. Users ca
 
 ## API Endpoints
 
+### Snippets
 - `GET /snippets` - Retrieve all snippets (supports query parameters)
   - `?search=hover` - Search in description and CSS code
   - `?category=Layout` - Filter by category
 - `POST /snippets` - Add a new snippet
   - Body: `{ "description": "...", "category": "...", "css_code": "..." }`
+- `PUT /snippets/:id` - Update an existing snippet
+  - Body: `{ "description": "...", "category": "...", "css_code": "..." }`
 
-## Deployment on Ubuntu EC2
+### Categories
+- `GET /categories` - Retrieve all categories
+- `POST /categories` - Add a new category
+  - Body: `{ "name": "..." }`
+- `DELETE /categories/:name` - Delete a category (only if no snippets use it)
+
+## Deployment Options
+
+### Option 1: Ubuntu EC2 (Traditional Server)
 
 1. **Upload files** to your EC2 instance
 2. **Run the deployment script**:
@@ -58,6 +69,56 @@ A simple web application for storing and discovering CSS code snippets. Users ca
    ```bash
    sudo systemctl restart nginx
    ```
+
+### Option 2: AWS Lightsail (Recommended for Simplicity)
+
+1. **Create Lightsail Instance**:
+   - Go to AWS Lightsail Console
+   - Create Instance → Platform: Linux/Unix → Blueprint: Node.js
+   - Choose $5/month plan (512MB RAM)
+
+2. **Deploy your application**:
+   ```bash
+   # SSH into Lightsail (use browser SSH or download key)
+   cd /opt/bitnami/projects
+   
+   # Upload your code (use file manager or git)
+   git clone https://github.com/yourusername/css-snippet-vault.git
+   cd css-snippet-vault
+   
+   # Install dependencies and start
+   npm install
+   sudo npm install -g pm2
+   pm2 start ecosystem.config.js
+   pm2 startup
+   pm2 save
+   ```
+
+3. **Configure Apache Proxy**:
+   ```bash
+   sudo nano /opt/bitnami/apache/conf/bitnami/bitnami-apps-prefix.conf
+   ```
+   Add this line:
+   ```apache
+   ProxyPass /app http://localhost:3000/
+   ProxyPassReverse /app http://localhost:3000/
+   ```
+   
+   ```bash
+   sudo /opt/bitnami/ctlscript.sh restart apache
+   ```
+
+4. **Set up Domain** (Optional):
+   - Lightsail Console → Networking → DNS Zones
+   - Create DNS zone for your domain
+   - Update nameservers at your registrar
+   - Add A record: @ → your Lightsail IP
+
+5. **Access your app**: 
+   - Via IP: `http://your-lightsail-ip/app`
+   - Via domain: `http://yourdomain.com/app`
+
+**Cost**: $5/month fixed price + domain cost (~$12/year)
 
 ## File Structure
 
@@ -82,6 +143,12 @@ CREATE TABLE snippets (
     description TEXT NOT NULL,
     category TEXT NOT NULL,
     css_code TEXT NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE categories (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT UNIQUE NOT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 ```
