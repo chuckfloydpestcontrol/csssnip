@@ -347,6 +347,9 @@ class SnippetVault {
                         <button type="button" class="edit-snippet-btn px-2 py-1 bg-yellow-600 text-white text-xs rounded hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500" data-snippet-id="${snippet.id}">
                             Edit
                         </button>
+                        <button type="button" class="delete-snippet-btn px-2 py-1 bg-red-600 text-white text-xs rounded hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500" data-snippet-id="${snippet.id}">
+                            Delete
+                        </button>
                     </div>
                 </div>
                 <div class="bg-gray-900 rounded-lg p-4 overflow-x-auto">
@@ -370,16 +373,31 @@ class SnippetVault {
                 }
             });
         });
+
+        // Add event listeners to delete buttons
+        container.querySelectorAll('.delete-snippet-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const snippetId = e.target.getAttribute('data-snippet-id');
+                const snippet = this.snippets.find(s => s.id == snippetId);
+                if (snippet) {
+                    this.confirmDeleteSnippet(snippet);
+                }
+            });
+        });
     }
 
     showEditModal(snippet) {
         document.getElementById('editModal').classList.remove('hidden');
         document.getElementById('editSnippetId').value = snippet.id;
         document.getElementById('editDescription').value = snippet.description;
-        document.getElementById('editCategory').value = snippet.category;
         
         // Populate category dropdown for edit modal
         this.populateEditCategorySelect();
+        
+        // Set the category after populating the dropdown
+        setTimeout(() => {
+            document.getElementById('editCategory').value = snippet.category;
+        }, 0);
         
         // Initialize edit code editor if not already done
         if (!this.editCodeEditor) {
@@ -483,6 +501,32 @@ class SnippetVault {
             } else {
                 const error = await response.json();
                 this.showErrorMessage(error.error || 'Failed to update snippet');
+            }
+        } catch (error) {
+            this.showErrorMessage('Network error. Please try again.');
+        }
+    }
+
+    confirmDeleteSnippet(snippet) {
+        if (confirm(`Are you sure you want to delete this snippet?\n\n"${snippet.description}"\n\nThis action cannot be undone.`)) {
+            this.deleteSnippet(snippet.id);
+        }
+    }
+
+    async deleteSnippet(snippetId) {
+        try {
+            const response = await fetch(`/snippets/${snippetId}`, {
+                method: 'DELETE'
+            });
+
+            if (response.ok) {
+                // Remove from local array
+                this.snippets = this.snippets.filter(s => s.id != snippetId);
+                this.filterAndRender();
+                this.showSuccessMessage('Snippet deleted successfully!');
+            } else {
+                const error = await response.json();
+                this.showErrorMessage(error.error || 'Failed to delete snippet');
             }
         } catch (error) {
             this.showErrorMessage('Network error. Please try again.');

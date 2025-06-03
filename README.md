@@ -80,14 +80,16 @@ A simple web application for storing and discovering CSS code snippets. Users ca
 2. **Deploy your application**:
    ```bash
    # SSH into Lightsail (use browser SSH or download key)
-   cd /opt/bitnami/projects
+   cd /opt/bitnami/
+   sudo mkdir projects
+   cd projects
    
    # Upload your code (use file manager or git)
-   git clone https://github.com/yourusername/css-snippet-vault.git
-   cd css-snippet-vault
+   git clone https://github.com/chuckfloydpestcontrol/csssnip.git
+   cd csssnip
    
    # Install dependencies and start
-   npm install
+   sudo npm install
    sudo npm install -g pm2
    pm2 start ecosystem.config.js
    pm2 startup
