@@ -352,8 +352,13 @@ class SnippetVault {
                         </button>
                     </div>
                 </div>
-                <div class="bg-gray-900 rounded-lg p-4 overflow-x-auto">
-                    <pre><code class="language-css text-sm">${this.escapeHtml(snippet.css_code)}</code></pre>
+                <div class="relative">
+                    <button type="button" class="copy-snippet-btn absolute top-2 right-2 px-3 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 z-10" data-css-code="${this.escapeHtml(snippet.css_code)}">
+                        Copy
+                    </button>
+                    <div class="bg-gray-900 rounded-lg p-4 overflow-x-auto">
+                        <pre><code class="language-css text-sm">${this.escapeHtml(snippet.css_code)}</code></pre>
+                    </div>
                 </div>
             </div>
         `).join('');
@@ -382,6 +387,14 @@ class SnippetVault {
                 if (snippet) {
                     this.confirmDeleteSnippet(snippet);
                 }
+            });
+        });
+
+        // Add event listeners to copy buttons
+        container.querySelectorAll('.copy-snippet-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const cssCode = e.target.getAttribute('data-css-code');
+                this.copyToClipboard(cssCode, e.target);
             });
         });
     }
@@ -531,6 +544,60 @@ class SnippetVault {
         } catch (error) {
             this.showErrorMessage('Network error. Please try again.');
         }
+    }
+
+    async copyToClipboard(text, button) {
+        // Decode HTML entities before copying
+        const textarea = document.createElement('textarea');
+        textarea.innerHTML = text;
+        const decodedText = textarea.value;
+
+        try {
+            await navigator.clipboard.writeText(decodedText);
+            
+            // Visual feedback
+            const originalText = button.textContent;
+            button.textContent = 'Copied!';
+            button.classList.remove('bg-blue-600', 'hover:bg-blue-700');
+            button.classList.add('bg-green-600', 'hover:bg-green-700');
+            
+            setTimeout(() => {
+                button.textContent = originalText;
+                button.classList.remove('bg-green-600', 'hover:bg-green-700');
+                button.classList.add('bg-blue-600', 'hover:bg-blue-700');
+            }, 2000);
+        } catch (err) {
+            // Fallback for older browsers
+            this.fallbackCopyToClipboard(decodedText, button);
+        }
+    }
+
+    fallbackCopyToClipboard(text, button) {
+        const textArea = document.createElement('textarea');
+        textArea.value = text;
+        textArea.style.position = 'fixed';
+        textArea.style.top = '-9999px';
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+
+        try {
+            document.execCommand('copy');
+            const originalText = button.textContent;
+            button.textContent = 'Copied!';
+            button.classList.remove('bg-blue-600', 'hover:bg-blue-700');
+            button.classList.add('bg-green-600', 'hover:bg-green-700');
+            
+            setTimeout(() => {
+                button.textContent = originalText;
+                button.classList.remove('bg-green-600', 'hover:bg-green-700');
+                button.classList.add('bg-blue-600', 'hover:bg-blue-700');
+            }, 2000);
+        } catch (err) {
+            this.showErrorMessage('Failed to copy to clipboard');
+        }
+
+        document.body.removeChild(textArea);
     }
 
     escapeHtml(text) {

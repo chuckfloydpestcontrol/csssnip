@@ -1,5 +1,5 @@
 {
-  "name": "css-snippet-vault",
+  "name": "cbo-css-snips",
   "version": "1.0.0",
   "description": "A simple web application for storing and viewing CSS code snippets",
   "main": "server.js",

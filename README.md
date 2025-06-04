@@ -1,4 +1,4 @@
-# CSS Snippet Vault
+# CBO CSS Snips
 
 A simple web application for storing and discovering CSS code snippets. Users can submit CSS snippets with descriptions and categories, then search and filter through the collection.
 
@@ -7,6 +7,8 @@ A simple web application for storing and discovering CSS code snippets. Users ca
 - **Snippet Submission**: Add CSS snippets with description (max 250 chars), category, and code
 - **Custom Categories**: Create and manage your own categories
 - **Edit Snippets**: Modify description, category, and code of existing snippets
+- **Delete Snippets**: Remove snippets with confirmation dialog
+- **Copy to Clipboard**: One-click copy button for each CSS snippet
 - **Category Management**: Add new categories and delete unused ones
 - **Search**: Filter snippets by description or CSS code content
 - **Category Filtering**: View snippets by specific category
@@ -129,7 +131,7 @@ A simple web application for storing and discovering CSS code snippets. Users ca
 ## File Structure
 
 ```
-css-snippet-vault/
+cbo-css-snips/
 ├── server.js              # Express server
 ├── package.json           # Dependencies
 ├── ecosystem.config.js    # PM2 configuration
