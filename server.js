@@ -50,7 +50,7 @@ const sessionConfig = {
   cookie: {
     maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production', // Use secure cookies in production
+    secure: false, // Keep simple for now - will fix with Apache headers
     sameSite: 'lax'
   }
 };
@@ -340,6 +340,12 @@ app.get('/snippets', (req, res) => {
 app.post('/snippets', requireAuth, (req, res) => {
   const { description, category, css_code } = req.body;
 
+  console.log('Creating snippet - Session info:', {
+    sessionID: req.sessionID,
+    userId: req.session.userId,
+    email: req.session.email
+  });
+
   if (!description || !category || !css_code) {
     return res.status(400).json({ error: 'All fields are required' });
   }
@@ -364,14 +370,18 @@ app.post('/snippets', requireAuth, (req, res) => {
           res.status(500).json({ error: err.message });
           return;
         }
-        res.json({
-          id: this.lastID,
-          description,
-          category,
-          css_code,
-          user_id: req.session.userId,
-          created_at: new Date().toISOString()
-        });
+        // Fetch the complete snippet with author info
+        db.get(
+          'SELECT s.*, u.email as author_email FROM snippets s LEFT JOIN users u ON s.user_id = u.id WHERE s.id = ?',
+          [this.lastID],
+          (err, snippet) => {
+            if (err) {
+              res.status(500).json({ error: err.message });
+              return;
+            }
+            res.json(snippet);
+          }
+        );
       }
     );
   });
