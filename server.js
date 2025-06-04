@@ -18,7 +18,6 @@ app.use(cors({
   credentials: true
 }));
 app.use(express.json());
-app.use(express.static('public'));
 
 app.use(session({
   store: new SQLiteStore({
@@ -31,10 +30,12 @@ app.use(session({
   cookie: {
     maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
+    secure: false, // Set to true only in production with HTTPS
     sameSite: 'lax'
   }
 }));
+
+app.use(express.static('public'));
 
 const db = new sqlite3.Database('./snippets.db', (err) => {
   if (err) {
@@ -87,12 +88,22 @@ app.post('/auth/login', async (req, res) => {
     req.session.email = user.email;
     req.session.isSuperUser = user.is_super_user === 1;
 
-    db.run('UPDATE users SET last_login = CURRENT_TIMESTAMP WHERE id = ?', [user.id]);
+    // Ensure session is saved before sending response
+    req.session.save((err) => {
+      if (err) {
+        console.error('Session save error:', err);
+        return res.status(500).json({ error: 'Failed to save session' });
+      }
 
-    res.json({
-      id: user.id,
-      email: user.email,
-      isSuperUser: user.is_super_user === 1
+      db.run('UPDATE users SET last_login = CURRENT_TIMESTAMP WHERE id = ?', [user.id]);
+
+      console.log('Login successful for:', user.email, 'Session ID:', req.sessionID);
+
+      res.json({
+        id: user.id,
+        email: user.email,
+        isSuperUser: user.is_super_user === 1
+      });
     });
   });
 });
