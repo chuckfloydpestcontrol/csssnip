@@ -14,10 +14,22 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(cors({
-  origin: true,
+  origin: function(origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    
+    // In production, you might want to whitelist specific origins
+    // For now, allow all origins but maintain credentials
+    return callback(null, true);
+  },
   credentials: true
 }));
 app.use(express.json());
+
+// Trust proxy for production environments
+if (process.env.NODE_ENV === 'production') {
+  app.set('trust proxy', 1); // Trust first proxy
+}
 
 app.use(session({
   store: new SQLiteStore({
@@ -30,7 +42,7 @@ app.use(session({
   cookie: {
     maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     httpOnly: true,
-    secure: false, // Set to true only in production with HTTPS
+    secure: process.env.NODE_ENV === 'production', // Use secure cookies in production
     sameSite: 'lax'
   }
 }));
