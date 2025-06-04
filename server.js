@@ -32,12 +32,6 @@ db.serialize(() => {
     name TEXT UNIQUE NOT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
   )`);
-  
-  // Insert default categories
-  const defaultCategories = ['Layout', 'Animation', 'Typography', 'Colors', 'Responsive'];
-  defaultCategories.forEach(category => {
-    db.run('INSERT OR IGNORE INTO categories (name) VALUES (?)', [category]);
-  });
 });
 
 app.get('/snippets', (req, res) => {
