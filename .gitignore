@@ -2,6 +2,7 @@
 node_modules/
 .pnp
 .pnp.js
+package-lock.json
 
 # database
 snippets.db
@@ -24,4 +25,3 @@ yarn-error.log*
 .idea/
 
 # FILES
-snippets.db

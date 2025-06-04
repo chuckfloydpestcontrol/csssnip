@@ -5,14 +5,76 @@ class SnippetVault {
         this.categories = [];
         this.codeEditor = null;
         this.editCodeEditor = null;
+        this.currentUser = null;
         this.init();
     }
 
-    init() {
+    async init() {
+        await this.checkAuth();
         this.initCodeEditor();
         this.bindEvents();
         this.loadCategories();
         this.loadSnippets();
+    }
+
+    async checkAuth() {
+        try {
+            const response = await fetch('/auth/me', {
+                credentials: 'include'
+            });
+            
+            if (!response.ok) {
+                window.location.href = '/login.html';
+                return;
+            }
+            
+            this.currentUser = await response.json();
+            this.updateUIForUser();
+        } catch (error) {
+            window.location.href = '/login.html';
+        }
+    }
+
+    updateUIForUser() {
+        // Add user info to header
+        const header = document.querySelector('header');
+        const userInfo = document.createElement('div');
+        userInfo.className = 'mt-4 flex justify-between items-center';
+        userInfo.innerHTML = `
+            <div class="text-sm text-gray-600">
+                Logged in as: <span class="font-medium">${this.currentUser.email}</span>
+                ${this.currentUser.isSuperUser ? '<span class="ml-2 px-2 py-1 bg-green-100 text-green-800 text-xs rounded">Super User</span>' : ''}
+            </div>
+            <div class="flex gap-2">
+                ${this.currentUser.isSuperUser ? '<a href="/admin.html" class="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700">Admin</a>' : ''}
+                <button id="changePasswordBtn" class="px-3 py-1 bg-gray-600 text-white text-sm rounded hover:bg-gray-700">Change Pass</button>
+                <button id="logoutBtn" class="px-3 py-1 bg-red-600 text-white text-sm rounded hover:bg-red-700">Logout</button>
+            </div>
+        `;
+        header.appendChild(userInfo);
+        
+        // Add logout functionality
+        document.getElementById('logoutBtn').addEventListener('click', () => this.logout());
+        
+        // Add change password functionality
+        document.getElementById('changePasswordBtn').addEventListener('click', () => this.showPasswordModal());
+        
+        // Update manage categories button visibility for super users
+        if (!this.currentUser.isSuperUser) {
+            document.getElementById('manageCategoriesBtn').style.display = 'none';
+        }
+    }
+
+    async logout() {
+        try {
+            await fetch('/auth/logout', {
+                method: 'POST',
+                credentials: 'include'
+            });
+            window.location.href = '/login.html';
+        } catch (error) {
+            this.showErrorMessage('Failed to logout');
+        }
     }
 
     initCodeEditor() {
@@ -67,6 +129,9 @@ class SnippetVault {
         const editForm = document.getElementById('editSnippetForm');
         const closeEditModal = document.getElementById('closeEditModal');
         const cancelEdit = document.getElementById('cancelEdit');
+        const passwordForm = document.getElementById('changePasswordForm');
+        const closePasswordModal = document.getElementById('closePasswordModal');
+        const cancelPassword = document.getElementById('cancelPassword');
 
         form.addEventListener('submit', (e) => this.handleSubmit(e));
         searchInput.addEventListener('input', (e) => this.handleSearch(e.target.value));
@@ -82,6 +147,10 @@ class SnippetVault {
         editForm.addEventListener('submit', (e) => this.handleEditSubmit(e));
         closeEditModal.addEventListener('click', () => this.hideEditModal());
         cancelEdit.addEventListener('click', () => this.hideEditModal());
+        
+        passwordForm.addEventListener('submit', (e) => this.handlePasswordChange(e));
+        closePasswordModal.addEventListener('click', () => this.hidePasswordModal());
+        cancelPassword.addEventListener('click', () => this.hidePasswordModal());
         
         newCategoryName.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
@@ -105,7 +174,9 @@ class SnippetVault {
 
     async loadCategories() {
         try {
-            const response = await fetch('/categories');
+            const response = await fetch('/categories', {
+                credentials: 'include'
+            });
             if (response.ok) {
                 this.categories = await response.json();
                 this.populateCategorySelects();
@@ -187,7 +258,8 @@ class SnippetVault {
     async deleteCategory(categoryName) {
         try {
             const response = await fetch(`/categories/${encodeURIComponent(categoryName)}`, {
-                method: 'DELETE'
+                method: 'DELETE',
+                credentials: 'include'
             });
 
             if (response.ok) {
@@ -218,6 +290,7 @@ class SnippetVault {
                 headers: {
                     'Content-Type': 'application/json',
                 },
+                credentials: 'include',
                 body: JSON.stringify({ name })
             });
 
@@ -259,6 +332,7 @@ class SnippetVault {
                 headers: {
                     'Content-Type': 'application/json',
                 },
+                credentials: 'include',
                 body: JSON.stringify(data)
             });
 
@@ -283,7 +357,9 @@ class SnippetVault {
 
     async loadSnippets() {
         try {
-            const response = await fetch('/snippets');
+            const response = await fetch('/snippets', {
+                credentials: 'include'
+            });
             if (response.ok) {
                 this.snippets = await response.json();
                 this.filterAndRender();
@@ -334,15 +410,23 @@ class SnippetVault {
 
         noResults.classList.add('hidden');
         
-        container.innerHTML = this.filteredSnippets.map(snippet => `
+        container.innerHTML = this.filteredSnippets.map(snippet => {
+            const canEdit = snippet.user_id === this.currentUser.id || this.currentUser.isSuperUser;
+            const authorEmail = snippet.author_email || 'Unknown';
+            
+            return `
             <div class="bg-white rounded-lg shadow-md p-6 mb-6">
                 <div class="flex justify-between items-start mb-4">
                     <div>
                         <h3 class="text-lg font-semibold text-gray-800">${this.escapeHtml(snippet.description)}</h3>
-                        <span class="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full mt-2">
-                            ${snippet.category}
-                        </span>
+                        <div class="mt-2 flex items-center gap-2">
+                            <span class="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
+                                ${snippet.category}
+                            </span>
+                            <span class="text-xs text-gray-500">by ${authorEmail}</span>
+                        </div>
                     </div>
+                    ${canEdit ? `
                     <div class="flex items-center gap-2">
                         <button type="button" class="edit-snippet-btn px-2 py-1 bg-yellow-600 text-white text-xs rounded hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500" data-snippet-id="${snippet.id}">
                             Edit
@@ -351,6 +435,7 @@ class SnippetVault {
                             Delete
                         </button>
                     </div>
+                    ` : ''}
                 </div>
                 <div class="relative">
                     <button type="button" class="copy-snippet-btn absolute top-2 right-2 px-3 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 z-10" data-css-code="${this.escapeHtml(snippet.css_code)}">
@@ -361,7 +446,7 @@ class SnippetVault {
                     </div>
                 </div>
             </div>
-        `).join('');
+        `}).join('');
 
         // Re-highlight code blocks
         if (typeof Prism !== 'undefined') {
@@ -496,6 +581,7 @@ class SnippetVault {
                 headers: {
                     'Content-Type': 'application/json',
                 },
+                credentials: 'include',
                 body: JSON.stringify(data)
             });
 
@@ -529,7 +615,8 @@ class SnippetVault {
     async deleteSnippet(snippetId) {
         try {
             const response = await fetch(`/snippets/${snippetId}`, {
-                method: 'DELETE'
+                method: 'DELETE',
+                credentials: 'include'
             });
 
             if (response.ok) {
@@ -632,6 +719,75 @@ class SnippetVault {
                 document.body.removeChild(messageDiv);
             }, 300);
         }, 3000);
+    }
+
+    showPasswordModal() {
+        document.getElementById('passwordModal').classList.remove('hidden');
+        document.getElementById('changePasswordForm').reset();
+        document.getElementById('passwordError').classList.add('hidden');
+        document.getElementById('passwordSuccess').classList.add('hidden');
+    }
+
+    hidePasswordModal() {
+        document.getElementById('passwordModal').classList.add('hidden');
+    }
+
+    async handlePasswordChange(e) {
+        e.preventDefault();
+        
+        const currentPassword = document.getElementById('currentPassword').value;
+        const newPassword = document.getElementById('newPassword').value;
+        const confirmPassword = document.getElementById('confirmPassword').value;
+        const errorDiv = document.getElementById('passwordError');
+        const successDiv = document.getElementById('passwordSuccess');
+        
+        // Hide previous messages
+        errorDiv.classList.add('hidden');
+        successDiv.classList.add('hidden');
+        
+        // Validate passwords match
+        if (newPassword !== confirmPassword) {
+            errorDiv.textContent = 'New passwords do not match';
+            errorDiv.classList.remove('hidden');
+            return;
+        }
+        
+        // Validate password length
+        if (newPassword.length < 6) {
+            errorDiv.textContent = 'Password must be at least 6 characters long';
+            errorDiv.classList.remove('hidden');
+            return;
+        }
+        
+        try {
+            const response = await fetch('/auth/change-password', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'include',
+                body: JSON.stringify({ currentPassword, newPassword })
+            });
+            
+            const data = await response.json();
+            
+            if (response.ok) {
+                successDiv.textContent = 'Password changed successfully!';
+                successDiv.classList.remove('hidden');
+                document.getElementById('changePasswordForm').reset();
+                
+                // Hide modal after 2 seconds
+                setTimeout(() => {
+                    this.hidePasswordModal();
+                }, 2000);
+            } else {
+                errorDiv.textContent = data.error || 'Failed to change password';
+                errorDiv.classList.remove('hidden');
+            }
+        } catch (error) {
+            errorDiv.textContent = 'Network error. Please try again.';
+            errorDiv.classList.remove('hidden');
+        }
     }
 }
 
