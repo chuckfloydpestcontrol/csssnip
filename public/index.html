@@ -20,120 +20,126 @@
 </head>
 <body class="bg-gray-100 min-h-screen">
     <div class="container mx-auto px-4 py-8">
-        <header class="text-center mb-8">
-            <h1 class="text-4xl font-bold text-gray-800 mb-2">CBO CSS Snips</h1>
-            <p class="text-gray-600">Store and discover CSS code snippets</p>
-        </header>
+        <div class="flex flex-col lg:flex-row gap-8">
+            <div class="lg:w-1/2">
+                <header class="text-center lg:text-left mb-8">
+                    <h1 class="text-4xl font-bold text-gray-800 mb-2">CBO CSS Snips</h1>
+                    <p class="text-gray-600">Store and discover CSS code snippets</p>
+                </header>
 
-        <!-- Submission Form -->
-        <div class="bg-white rounded-lg shadow-md p-6 mb-8">
-            <div class="flex items-center justify-between mb-4">
-                <h2 class="text-2xl font-semibold text-gray-800">Add New Snippet</h2>
-                <button type="button" id="toggleFormBtn" class="text-gray-500 hover:text-gray-700 focus:outline-none">
-                    <svg id="chevronIcon" class="w-6 h-6 transform transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                    </svg>
-                </button>
-            </div>
-            <div id="formContent">
-            <form id="snippetForm">
-                <div class="mb-4">
-                    <label for="description" class="block text-sm font-medium text-gray-700 mb-2">Description</label>
-                    <input type="text" id="description" name="description" maxlength="250" required
-                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                           placeholder="Brief description of your CSS snippet">
-                    <p class="text-xs text-gray-500 mt-1">Max 250 characters</p>
-                </div>
-
-                <div class="mb-4">
-                    <label for="category" class="block text-sm font-medium text-gray-700 mb-2">Category</label>
-                    <div class="flex gap-2">
-                        <select id="category" name="category" required
-                                class="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            <option value="">Select a category</option>
-                        </select>
-                        <button type="button" id="addCategoryBtn" 
-                                class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 transition duration-200">
-                            + New
-                        </button>
-                        <button type="button" id="manageCategoriesBtn" 
-                                class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
-                            Manage
+                <!-- Submission Form -->
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="text-2xl font-semibold text-gray-800">Add New Snippet</h2>
+                        <button type="button" id="toggleFormBtn" class="text-gray-500 hover:text-gray-700 focus:outline-none">
+                            <svg id="chevronIcon" class="w-6 h-6 transform transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                            </svg>
                         </button>
                     </div>
-                    <div id="newCategoryInput" class="hidden mt-2">
-                        <input type="text" id="newCategoryName" placeholder="Enter new category name..."
-                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500">
-                        <div class="flex gap-2 mt-2">
-                            <button type="button" id="saveCategoryBtn"
-                                    class="px-3 py-1 bg-green-600 text-white text-sm rounded hover:bg-green-700">
-                                Save
-                            </button>
-                            <button type="button" id="cancelCategoryBtn"
-                                    class="px-3 py-1 bg-gray-500 text-white text-sm rounded hover:bg-gray-600">
-                                Cancel
-                            </button>
+                    <div id="formContent">
+                    <form id="snippetForm">
+                        <div class="mb-4">
+                            <label for="description" class="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                            <input type="text" id="description" name="description" maxlength="250" required
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                   placeholder="Brief dscription of your CSS snippet">
+                            <p class="text-xs text-gray-500 mt-1">Max 250 characters</p>
                         </div>
-                    </div>
-                    <div id="manageCategoriesModal" class="hidden mt-2">
-                        <div class="bg-gray-50 border border-gray-200 rounded-md p-4">
-                            <h4 class="text-sm font-medium text-gray-700 mb-3">Manage Categories</h4>
-                            <div id="categoryList" class="space-y-2">
-                                <!-- Categories will be populated here -->
+
+                        <div class="mb-4">
+                            <label for="category" class="block text-sm font-medium text-gray-700 mb-2">Category</label>
+                            <div class="flex gap-2">
+                                <select id="category" name="category" required
+                                        class="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <option value="">Select a category</option>
+                                </select>
+                                <button type="button" id="addCategoryBtn" 
+                                        class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 transition duration-200">
+                                    + New
+                                </button>
+                                <button type="button" id="manageCategoriesBtn" 
+                                        class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
+                                    Manage
+                                </button>
                             </div>
-                            <button type="button" id="closeCategoryManagerBtn"
-                                    class="mt-3 px-3 py-1 bg-gray-500 text-white text-sm rounded hover:bg-gray-600">
-                                Close
-                            </button>
+                            <div id="newCategoryInput" class="hidden mt-2">
+                                <input type="text" id="newCategoryName" placeholder="Enter new category name..."
+                                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500">
+                                <div class="flex gap-2 mt-2">
+                                    <button type="button" id="saveCategoryBtn"
+                                            class="px-3 py-1 bg-green-600 text-white text-sm rounded hover:bg-green-700">
+                                        Save
+                                    </button>
+                                    <button type="button" id="cancelCategoryBtn"
+                                            class="px-3 py-1 bg-gray-500 text-white text-sm rounded hover:bg-gray-600">
+                                        Cancel
+                                    </button>
+                                </div>
+                            </div>
+                            <div id="manageCategoriesModal" class="hidden mt-2">
+                                <div class="bg-gray-50 border border-gray-200 rounded-md p-4">
+                                    <h4 class="text-sm font-medium text-gray-700 mb-3">Manage Categories</h4>
+                                    <div id="categoryList" class="space-y-2">
+                                        <!-- Categories will be populated here -->
+                                    </div>
+                                    <button type="button" id="closeCategoryManagerBtn"
+                                            class="mt-3 px-3 py-1 bg-gray-500 text-white text-sm rounded hover:bg-gray-600">
+                                        Close
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="cssCode" class="block text-sm font-medium text-gray-700 mb-2">CSS Code</label>
+                            <div class="border border-gray-300 rounded-md overflow-hidden">
+                                <textarea id="cssCode" name="cssCode" required
+                                          class="hidden"
+                                          placeholder="Enter your CSS code here..."></textarea>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
+                            Add Snippet
+                        </button>
+                    </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="lg:w-1/2">
+                <!-- Search and Filter -->
+                <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+                    <div class="flex flex-col md:flex-row gap-4">
+                        <div class="flex-1">
+                            <label for="searchInput" class="block text-sm font-medium text-gray-700 mb-2">Search</label>
+                            <input type="text" id="searchInput" placeholder="Search snippets..."
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <div class="md:w-48">
+                            <label for="categoryFilter" class="block text-sm font-medium text-gray-700 mb-2">Filter by Category</label>
+                            <select id="categoryFilter"
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <option value="">All categories</option>
+                            </select>
                         </div>
                     </div>
                 </div>
 
-                <div class="mb-4">
-                    <label for="cssCode" class="block text-sm font-medium text-gray-700 mb-2">CSS Code</label>
-                    <div class="border border-gray-300 rounded-md overflow-hidden">
-                        <textarea id="cssCode" name="cssCode" required
-                                  class="hidden"
-                                  placeholder="Enter your CSS code here..."></textarea>
+                <!-- Snippets Display -->
+                <div id="snippetsContainer">
+                    <div id="loadingSpinner" class="text-center py-8">
+                        <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                        <p class="mt-2 text-gray-600">Loading snippets...</p>
                     </div>
                 </div>
 
-                <button type="submit" class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
-                    Add Snippet
-                </button>
-            </form>
-            </div>
-        </div>
-
-        <!-- Search and Filter -->
-        <div class="bg-white rounded-lg shadow-md p-6 mb-8">
-            <div class="flex flex-col md:flex-row gap-4">
-                <div class="flex-1">
-                    <label for="searchInput" class="block text-sm font-medium text-gray-700 mb-2">Search</label>
-                    <input type="text" id="searchInput" placeholder="Search snippets..."
-                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                </div>
-                <div class="md:w-48">
-                    <label for="categoryFilter" class="block text-sm font-medium text-gray-700 mb-2">Filter by Category</label>
-                    <select id="categoryFilter"
-                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        <option value="">All categories</option>
-                    </select>
+                <!-- No results message -->
+                <div id="noResults" class="hidden text-center py-8">
+                    <p class="text-gray-600">No snippets found matching your criteria.</p>
                 </div>
             </div>
-        </div>
-
-        <!-- Snippets Display -->
-        <div id="snippetsContainer">
-            <div id="loadingSpinner" class="text-center py-8">
-                <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                <p class="mt-2 text-gray-600">Loading snippets...</p>
-            </div>
-        </div>
-
-        <!-- No results message -->
-        <div id="noResults" class="hidden text-center py-8">
-            <p class="text-gray-600">No snippets found matching your criteria.</p>
         </div>
 
         <!-- Edit Snippet Modal -->
