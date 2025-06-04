@@ -147,9 +147,20 @@ EMAIL_FROM=CBO CSS Snips <noreply@cbosnip.com>
 
 ## Deployment Options
 
-### Option 1: Ubuntu EC2 (Traditional Server)
+### Option 1: AWS Lightsail with Bitnami (Recommended)
 
-1. **Upload files** to your EC2 instance
+For detailed deployment and update instructions, see [LIGHTSAIL_DEPLOYMENT.md](LIGHTSAIL_DEPLOYMENT.md).
+
+**Quick Overview:**
+- Uses Bitnami Node.js stack on AWS Lightsail
+- Includes Apache reverse proxy configuration
+- Handles permissions and session issues
+- Complete update guide for existing installations
+- Cost: $5/month fixed price
+
+### Option 2: Traditional VPS (Ubuntu/Nginx)
+
+1. **Upload files** to your server
 2. **Set up environment variables**:
    ```bash
    cp .env.example .env
@@ -159,76 +170,17 @@ EMAIL_FROM=CBO CSS Snips <noreply@cbosnip.com>
    ```bash
    ./deploy.sh
    ```
-4. **Update nginx config** with your domain/IP:
-   - Edit `/etc/nginx/sites-available/css-snippet-vault`
-   - Replace `your-domain.com` with your actual domain or IP address
-5. **Restart nginx**:
-   ```bash
-   sudo systemctl restart nginx
-   ```
+4. **Configure Nginx** for reverse proxy
+5. **Set up SSL** with Let's Encrypt
 
-### Option 2: AWS Lightsail (Recommended for Simplicity)
+### Important Deployment Notes
 
-1. **Create Lightsail Instance**:
-   - Go to AWS Lightsail Console
-   - Create Instance → Platform: Linux/Unix → Blueprint: Node.js
-   - Choose $5/month plan (512MB RAM)
+1. **Environment Variables** - Always set `NODE_ENV=production` on your server
+2. **Session Configuration** - HTTPS is required for secure cookies in production
+3. **Database Permissions** - Ensure write permissions for `snippets.db` and `sessions.db`
+4. **Proxy Headers** - Configure your reverse proxy to forward proper headers
 
-2. **Deploy your application**:
-   ```bash
-   # SSH into Lightsail (use browser SSH or download key)
-   cd /opt/bitnami/
-   sudo mkdir projects
-   cd projects
-   
-   # Upload your code (use file manager or git)
-   git clone https://github.com/chuckfloydpestcontrol/csssnip.git
-   cd csssnip
-   
-   # Set up environment
-   cp .env.example .env
-   sudo nano .env  # Configure your settings
-   
-   # Install dependencies and start
-   sudo npm install
-   
-   # If sqlite3 errors occur on Lightsail/EC2:
-   sudo npm install --build-from-source sqlite3
-   
-   # Initialize database
-   node migrations/001_add_users.js
-   
-   sudo npm install -g pm2
-   pm2 start ecosystem.config.js
-   pm2 startup
-   pm2 save
-   ```
-
-3. **Configure Apache Proxy**:
-   ```bash
-   sudo nano /opt/bitnami/apache/conf/bitnami/bitnami-apps-prefix.conf
-   ```
-   Add this line:
-   ```apache
-   ProxyPass /app http://localhost:3000/
-   ProxyPassReverse /app http://localhost:3000/
-   ```
-   
-   ```bash
-   sudo /opt/bitnami/ctlscript.sh restart apache
-   ```
-
-4. **Set up Domain** (Optional):
-   - Lightsail Console → Networking → DNS Zones
-   - Create DNS zone for your domain
-   - Update nameservers at your registrar
-   - Add A record: @ → your Lightsail IP
-
-5. **Access your app**: 
-   - Via IP: `http://your-lightsail-ip/app`
-   - Via domain: `http://yourdomain.com/app`
-
-**Cost**: $5/month fixed price + domain cost (~$12/year)
+For production issues, see [PRODUCTION_SETUP.md](PRODUCTION_SETUP.md).
 
 ## File Structure
 

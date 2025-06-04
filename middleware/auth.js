@@ -1,7 +1,17 @@
 const jwt = require('jsonwebtoken');
 
 function requireAuth(req, res, next) {
-  console.log('Auth check - Session ID:', req.sessionID, 'User ID:', req.session.userId);
+  console.log('Auth check:', {
+    sessionID: req.sessionID,
+    userId: req.session?.userId,
+    session: req.session,
+    secure: req.secure,
+    protocol: req.protocol,
+    headers: {
+      'x-forwarded-proto': req.headers['x-forwarded-proto'],
+      'x-forwarded-for': req.headers['x-forwarded-for']
+    }
+  });
   
   if (!req.session.userId) {
     return res.status(401).json({ error: 'Authentication required' });

@@ -26,12 +26,20 @@ app.use(cors({
 }));
 app.use(express.json());
 
+// Debug environment
+console.log('Environment:', {
+  NODE_ENV: process.env.NODE_ENV,
+  PORT: process.env.PORT,
+  SESSION_SECRET: process.env.SESSION_SECRET ? 'SET' : 'NOT SET'
+});
+
 // Trust proxy for production environments
 if (process.env.NODE_ENV === 'production') {
   app.set('trust proxy', 1); // Trust first proxy
+  console.log('Trust proxy enabled for production');
 }
 
-app.use(session({
+const sessionConfig = {
   store: new SQLiteStore({
     db: 'sessions.db',
     table: 'sessions'
@@ -45,7 +53,15 @@ app.use(session({
     secure: process.env.NODE_ENV === 'production', // Use secure cookies in production
     sameSite: 'lax'
   }
-}));
+};
+
+console.log('Session config:', {
+  secure: sessionConfig.cookie.secure,
+  sameSite: sessionConfig.cookie.sameSite,
+  httpOnly: sessionConfig.cookie.httpOnly
+});
+
+app.use(session(sessionConfig));
 
 app.use(express.static('public'));
 
