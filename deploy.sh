@@ -12,8 +12,8 @@ sudo apt-get install -y nodejs
 # Install PM2 globally
 sudo npm install -g pm2
 
-# Install Nginx
-sudo apt install -y nginx
+# Install Nginx (uncomment to use)
+# sudo apt install -y nginx
 
 # Install application dependencies
 npm install
