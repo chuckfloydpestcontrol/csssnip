@@ -6,6 +6,7 @@ package-lock.json
 
 # database
 snippets.db
+sessions.db
 
 # misc
 .DS_Store
